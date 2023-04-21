@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 
 // para encriptar la contraseña
-export const encrypPassword = async (password) => {
+export const encryptPassword = async (password) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
     return hashedPassword
