@@ -16,7 +16,7 @@ const regularExpression = (data) => {
 }
 const generateQuote = async (req, res) => {
 
-  const { destiny, weight, quantity, declaredValue, id_category } = req.body
+  const { destiny, weight, quantity, declaredValue } = req.body
 
   try {
     const token = req.headers.authorization
@@ -35,7 +35,7 @@ const generateQuote = async (req, res) => {
 
     const quote = {
       originLocationCode: "11001000",
-      destinyLocationCode: idLocationDestiny[0].locationCode.toString(),
+      destinyLocationCode: idLocationDestiny[0].locationCode,
       height: shippingBox[0].height,
       width: shippingBox[0].width,
       length: shippingBox[0].length,
@@ -63,8 +63,98 @@ const generateQuote = async (req, res) => {
   } catch (e) {
     console.log(e)
   }
+}
+
+const getShippingCart = async (req, res) => {
+  let totalWeight = 0
+  let totalValue = 0
+  let totalQuantity = 0
+  try {
+    const token = req.headers.authorization
+    const decoded = jwt_decode(token.split(' ')[1])
+
+    const user = await pool.query('SELECT * FROM users WHERE id=?', [decoded.id])
+
+    const shippingCart = await pool.query('SELECT * FROM items_sending_cart WHERE user_id=?', user[0].id)
+
+    for (let i of shippingCart) {
+      totalWeight += i.weight
+      totalValue += i.declared_value
+      totalQuantity += i.quantity
+    }
+
+    const shippingBox = boxes.filter(box => box.min_weight < totalWeight && totalWeight <= box.max_weight)
+
+
+    return res.status(200).json({
+      cart: shippingCart,
+      assigned_box: shippingBox[0],
+      totalWeight,
+      totalValue,
+      totalQuantity
+
+    })
+
+  } catch (error) {
+    console.log(error)
+
+  }
 
 
 }
 
-module.exports = { generateQuote }
+const sendShippingCart = async (req, res) => {
+  const { id_category, quantity, weight, declaredValue } = req.body
+
+  try {
+    const token = req.headers.authorization
+    const decoded = jwt_decode(token.split(' ')[1])
+    const user = await pool.query('SELECT * FROM users WHERE id=?', [decoded.id])
+    const category = await pool.query('SELECT * FROM productCategories WHERE id_Categories=?', [id_category])
+
+    if(weight > 50) return res.status(400).json({message: 'Weight exceed'})
+
+    const newShipping = {
+      id: randomUUID(),
+      quantity,
+      declared_value: declaredValue,
+      id_category: category[0].id_Categories,
+      weight,
+      user_id: user[0].id
+    }
+    await pool.query('INSERT INTO items_sending_cart SET ?', [newShipping])
+
+    return res.status(200).json({
+      message: 'Item Added Successfully'
+    })
+
+  } catch (error) {
+    console.log(error)
+  }
+
+
+}
+
+
+const deleteItemCart = async (req, res) =>{
+  const { id } = req.params
+  try {
+    const token = req.headers.authorization
+    const decoded = jwt_decode(token.split(' ')[1])
+
+    const user = await pool.query('SELECT * FROM users WHERE id=?', [decoded.id])
+
+    const items = await pool.query('SELECT * FROM items_sending_cart WHERE user_id=?', user[0].id)
+
+    pool.query('DELETE FROM items_sending_cart WHERE id=? AND user_id=?',[id, items[0].user_id])
+
+    res.status(200).json({
+      message: 'Item deleted successfully'
+    })
+
+    
+  } catch (error) {
+    
+  }
+}
+module.exports = { generateQuote, sendShippingCart, getShippingCart, deleteItemCart }

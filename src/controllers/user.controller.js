@@ -1,4 +1,4 @@
-import {pool} from '../db/database.js'
+import pool from '../db/database.js'
 import jwt_decode from 'jwt-decode'
 
 //para listar todos los empleados 
@@ -27,14 +27,14 @@ export const getUserLogin = async (req, res) => {
         //const token = req.headers['x-access-token'];
         const decoded = jwt_decode(token)
 
-        const [rows] = await pool.query('SELECT nameUser FROM Usuarios WHERE id_user = ?', [decoded.id]) //calor que se obtine de la url
+        const rows = await pool.query('SELECT name FROM users WHERE id=?', [decoded.id]) //calor que se obtine de la url
+        console.log(rows)
         if (rows.length <= 0) return res.status(404).json({
             message: 'ERROR'
         })
         res.json(rows[0])
 
     } catch (error) {
-
         return res.status(400).json({
             message: "error consulta"
         })
