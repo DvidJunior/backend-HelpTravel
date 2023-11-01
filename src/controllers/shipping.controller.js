@@ -1,10 +1,9 @@
 import { pool } from '../db/database.js'
-import { encryptPassword, comparePassword } from '../libs/encrypt.js'
 import jwt from 'jsonwebtoken'
 import jwt_decode from 'jwt-decode'
 import { randomUUID } from 'crypto'
 import { createHash } from 'crypto';
-import boxes from '../public/boxes.json'
+import boxes from '../public/boxes.json' assert { type: "json" }
 import fetch from "node-fetch"
 import { SESSION_TRACKER, APIKEY } from '../config.js'
 import { json } from 'express'

@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js --exec babel-node",
     "cypress:open": "cypress open",
-    "start": "babel-node src/index.js"
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
