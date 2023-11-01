@@ -11,10 +11,17 @@ export const crearUsuario = async (req, res) => {
     let fechNacimiento = new Date()
     let creacion = new Date()
     let foto = 'aca va la url de la imagen '
+    let cedula = 0
 
-    const {nameUser, cedula, password, email} = req.body // de la pericion traigame solo dos datos
+    const {nameUser, email, password} = req.body // de la pericion traigame solo dos datos
 
     try {
+
+        // Verificar si el usuario ya existe
+        const [existingUser] = await pool.query('SELECT * FROM Usuarios WHERE email = ?', [email]);
+        if (existingUser.length > 0) {
+            return res.status(400).json({ message: "El correo electrónico ya está registrado." });
+        }
 
         const encry = await encrypPassword(password) // ejecuto el algo de encriptar y se lo paso a la consulta 
 
@@ -51,6 +58,7 @@ export const loguearse = async (req, res) => {
     const {email, password} = req.body // recoge de la peticion POST estos datos
 
     try {
+        console.log(email, password);
 
         const [result] = await pool.query('SELECT id_user FROM Usuarios WHERE email = ?', [email]) // busca el id del usuario por el nombre
         if (result.length <= 0) return res.status(404).json({message: 'ERROR USUARIO NO ES ENCONTRADO'}) // pregunte si se encuentra o saque error

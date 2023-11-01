@@ -3,6 +3,7 @@ import { encryptPassword, comparePassword } from '../libs/encrypt.js'
 import jwt from 'jsonwebtoken'
 import jwt_decode from 'jwt-decode'
 import { randomUUID } from 'crypto'
+import { createHash } from 'crypto';
 import boxes from '../public/boxes.json'
 import fetch from "node-fetch"
 import { SESSION_TRACKER, APIKEY } from '../config.js'
@@ -55,8 +56,7 @@ export const getShippingCart = async (req, res) => {
       totalQuantity += i.quantity
     }
 
-    const shippingBox = boxes.filter(box => box.min_weight < totalWeight && totalWeight <= box.max_weight)
-
+    const shippingBox = boxes.filter(box => box.min_weight <= totalWeight && totalWeight <= box.max_weight)
 
     return res.status(200).json({
       cart: shippingCart,
@@ -167,6 +167,7 @@ export const generateQuote = async (req, res) => {
       declaredValue,
       saleValue: 250000
     }
+    console.log(quote);
 
     const response = await fetch('https://api-v2.dev.mpr.mipaquete.com/quoteShipping', {
       method: 'POST',
@@ -189,5 +190,70 @@ export const generateQuote = async (req, res) => {
   }
 
 
+}
+function shortUUID() {
+  const uuid = randomUUID();
+  const hash = createHash('sha256').update(uuid).digest('hex');
+  return hash.substring(0, 7);
+}
+export const addShipping = async (req, res) => {
+  
+  const {origin, destinoCiudad, destinoDir, precioTotal, diasHabiles, 
+         companyName, num_guia} = req.body
+  
+  try {
+
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt_decode(token)
+
+    const [user] = await pool.query('SELECT * FROM Usuarios WHERE id_user = ?', [decoded.id])
+
+    const [empl] = await pool.query('SELECT * FROM empleados')
+
+    const newShipping = {
+      id_envio: shortUUID(),
+      tipo_servicio: 'Envio', 
+      origin, 
+      destinoCiudad, 
+      destinoDir, 
+      precioTotal,
+      status_paquete: 'RECIBIDO', 
+      create_at: new Date(), 
+      diasHabiles, 
+      id_usuario: user[0].id_user, 
+      id_empleado: empl[0].id, 
+      companyName, 
+      num_guia
+    }
+
+    await pool.query('INSERT INTO envio SET ?', [newShipping])
+
+    return res.status(200).json({
+      message: 'Item Added Successfully'
+    })
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+export const getShipping = async (req, res) => {
+  
+  try {
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt_decode(token)
+
+    const [user] = await pool.query('SELECT * FROM Usuarios WHERE id_user = ?', [decoded.id])
+
+    const [shippingCart] = await pool.query('SELECT * FROM envio WHERE id_usuario = ?', user[0].id_user)
+
+    return res.status(200).json({
+      cart: shippingCart
+
+    })
+
+  } catch (error) {
+    console.log(error)
+
+  }
 }
 //module.exports = { generateQuote }

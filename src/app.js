@@ -15,8 +15,20 @@ app.use(cors({
     optionsSuccessStatus: 200
 }))
 
+// app.use(cors({
+//     origin: function(origin, callback){
+  
+//       if(!origin) return callback(null, true);
+//       if(allowedOrigins.indexOf(origin) === -1){
+//         var msg = 'The CORS policy for this site does not ' +
+//                   'allow access from the specified Origin.';
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     }
+//   }))
+  
 app.use(morgan('dev')); // midelware para intecertar peticiones
-
 
 app.use(express.json()); // coloca antes de las rutas para converitr en json y los acpete express
 

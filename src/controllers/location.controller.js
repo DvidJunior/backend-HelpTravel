@@ -21,4 +21,3 @@ export const departamentosCO = async (req, res) => {
     console.log(error);
   }*/
 };
-export const ciudadesCO = async (req, res) => {};
