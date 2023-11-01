@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js --exec babel-node",
-    "cypress:open": "cypress open" 
+    "cypress:open": "cypress open"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +28,7 @@
     "@babel/core": "^7.21.4",
     "@babel/node": "^7.20.7",
     "@babel/preset-env": "^7.21.4",
+    "@flydotio/dockerfile": "^0.4.10",
     "cypress": "^13.3.0",
     "nodemon": "^2.0.22"
   }
