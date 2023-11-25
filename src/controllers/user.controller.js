@@ -46,7 +46,11 @@ export const getUser = async (req, res) => {
 
     try {
 
-        const [rows] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [req.params.id]) //calor que se obtine de la url
+        const token = req.headers.authorization.split(' ')[1];
+        //const token = req.headers['x-access-token'];
+        const decoded = jwt_decode(token)
+
+        const [rows] = await pool.query('SELECT * FROM Usuarios WHERE id_user = ?', [decoded.id]) //calor que se obtine de la url
         if (rows.length <= 0) return res.status(404).json({
             message: 'ERROR'
         })

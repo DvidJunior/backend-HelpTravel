@@ -31,7 +31,7 @@ const app = express() // crear un servidor
 app.use(cors({
     origin: '*',
     optionsSuccessStatus: 200
-}));
+})); 
   
 app.use(morgan('dev')); // midelware para intecertar peticiones
 

@@ -243,11 +243,10 @@ export const getShipping = async (req, res) => {
 
     const [user] = await pool.query('SELECT * FROM Usuarios WHERE id_user = ?', [decoded.id])
 
-    const [shippingCart] = await pool.query('SELECT * FROM envio WHERE id_usuario = ?', user[0].id_user)
+    const [envio] = await pool.query('SELECT * FROM envio WHERE id_usuario = ?', user[0].id_user)
 
     return res.status(200).json({
-      cart: shippingCart
-
+      cart: envio
     })
 
   } catch (error) {
